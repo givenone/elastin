@@ -30,8 +30,9 @@ public class HairManager : MonoBehaviour
 
                 int n_vertex = 0; // 1024
                 float x = 0.0f, y = 0.0f, z = 0.0f;
-                float cx = 1.689f, cy = 0.719f, cz = 0.099f;
-                for (int i = 0; i < 1; i++)
+                float cx = 0f, cy = 0.0f, cz = 0.00f; // default camera center 
+                float hx = 0.005f, hy = 1.75f, hz = 0.01f; // default scalp center
+                for (int i = 0; i < n_strand; i++)
                 {
                     n_vertex = reader.ReadInt32();
                     Vector3[] vertices = new Vector3[n_vertex];
@@ -42,12 +43,15 @@ public class HairManager : MonoBehaviour
                         x = reader.ReadSingle();
                         y = reader.ReadSingle();
                         z = reader.ReadSingle();
-                        vertices[j] = new Vector3(x*10 + cx, y * 10 + cy, z * 10 + cz);
+                        vertices[j] = new Vector3(x + cx -hx, y + cy -hy, z  + cz -hz);
                         c += 3;
                     }
                     DrawStrand(vertices, n_vertex);
                 }
             }
+        }
+        else{
+            Debug.Log("file not found");
         }
     }
 
@@ -55,8 +59,7 @@ public class HairManager : MonoBehaviour
     {
         GameObject Hair = GameObject.Instantiate(hair);
         lineRenderer = Hair.GetComponent<LineRenderer>();
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.SetColors(c1, c2);
+        lineRenderer.SetWidth(0.003f, 0.003f);
 
         lineRenderer.positionCount = n_vertex;
         lineRenderer.SetPositions(vertexPositions);
