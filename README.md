@@ -4,9 +4,9 @@
 
 - client-side (application) implementation of 내 손안의 헤어샵
 - developed with Unity3D version 2019.4.2f1
-- demo screenshot
+- demo play
+  - https://drive.google.com/file/d/11s83sOdoEx2piHmpw-u77zHkfrEBjJ1C/view?usp=sharing
 
-![image](./front.png)![image](./back.png)
 
 ## UI Component
 
