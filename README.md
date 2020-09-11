@@ -4,7 +4,7 @@
 
 - client-side (application) implementation of 내 손안의 헤어샵
 - developed with Unity3D version 2019.4.2f1
-- demo play
+- demo run
   - https://drive.google.com/file/d/11s83sOdoEx2piHmpw-u77zHkfrEBjJ1C/view?usp=sharing
 
 
@@ -20,21 +20,30 @@
 
 ## 3D Object Component
 
+- Model: parent object for hair, face, and upper torso
 - HairManager: generates **Hair** (saved in prefab) 
   - Hair: models a hair spline with LineRenderer
+  - HairCache: saves the rendered hair statically
 - FaceManager: anchor for the child component (face)
 
 
+## Rendering
 
-## Other Assets
+- Cut: change hair strand length
+- Dye: pick color from palette and update model
+- Perm: TODO
+- Comb: TODO
+
+
+## Editing
+
+- HDRP (high definition render pipeline) for realistic hair rendering
+
+
+## Third Party Assets
 
 - ImageAndVideoPicker: gallery access in Android platform
 - HairShader-HDRP: high quality hair shading 
+- HairStudio: human torso
 
 
-
-##### TODO
-
-- mtl to mat conversion (mtl file doesn't generate texture in Unity)
-- HDRP (high definition render pipeline) for realistic hair rendering
-  - try various combinations (e.g. ambient occlusion & specular terms)
