@@ -8,16 +8,15 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HDRP_Test_SG
-  m_Shader: {fileID: 4800000, guid: 84f7e74b3a562f94e8a860d19e35f49d, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: f7fa20a13962a4c49a61ec286a1dc3d4, type: 3}
+  m_ShaderKeywords: _ADD_PRECOMPUTED_VELOCITY
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2000
   stringTagMap:
     MotionVector: User
   disabledShaderPasses:
-  - MOTIONVECTORS
   - TransparentBackface
   m_SavedProperties:
     serializedVersion: 3
@@ -47,6 +46,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CoatMaskMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CoreAlphaMaskGreyscaleOpacity:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CoreTextureColour:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -114,6 +121,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _VRTC:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - Vector1_214EC836: 0.06
     - Vector1_22D00644: 0.343
@@ -123,7 +138,9 @@ Material:
     - _AORemapMax: 1
     - _AORemapMin: 0
     - _ATDistance: 1
+    - _AddPrecomputedVelocity: 1
     - _AlbedoAffectEmissive: 0
+    - _AlphaClipThreshold: 0.5
     - _AlphaCutoff: 0.5
     - _AlphaCutoffEnable: 0
     - _AlphaCutoffPostpass: 0.5
@@ -131,7 +148,9 @@ Material:
     - _AlphaDstBlend: 0
     - _AlphaSrcBlend: 1
     - _Anisotropy: 0
+    - _AnisotropyValue: 0.5
     - _BlendMode: 0
+    - _BumpPower: 0.5
     - _CoatMask: 0
     - _CullMode: 2
     - _CullModeForward: 2
@@ -170,6 +189,7 @@ Material:
     - _EnableSpecularOcclusion: 0
     - _EnableWind: 0
     - _EnergyConservingSpecularColor: 1
+    - _FinalSmoothness: 0
     - _HdrpVersion: 2
     - _HeightAmplitude: 0.02
     - _HeightCenter: 0.5
@@ -186,21 +206,31 @@ Material:
     - _IridescenceMask: 1
     - _IridescenceThickness: 1
     - _LinkDetailsWithBase: 1
+    - _MainHighlightExponent: 0.2
+    - _MainHighlightPosition: 0
+    - _MainHighlightStrength: 0.25
     - _MaterialID: 1
     - _Metallic: 0
+    - _NoisePower: 0
     - _NormalMapSpace: 0
     - _NormalScale: 1
+    - _OpacityPower: 1
     - _PPDLodThreshold: 5
     - _PPDMaxSamples: 15
     - _PPDMinSamples: 5
     - _PPDPrimitiveLength: 1
     - _PPDPrimitiveWidth: 1
     - _PreRefractionPass: 0
+    - _PuffUp: 0
+    - _PushTangent: 0
     - _ReceivesSSR: 1
     - _RefractionModel: 0
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
     - _SSRefractionProjectionModel: 0
+    - _SecondaryHighlightExponent: 0.2
+    - _SecondaryHighlightPosition: 0
+    - _SecondaryHighlightStrength: 0.25
     - _ShiverDirectionality: 0.5
     - _ShiverDrag: 0.2
     - _Smoothness: 0.5
@@ -208,6 +238,7 @@ Material:
     - _SmoothnessRemapMin: 0
     - _SpecularAAScreenSpaceVariance: 0.1
     - _SpecularAAThreshold: 0.2
+    - _Spread: 0
     - _SrcBlend: 1
     - _StencilRef: 0
     - _StencilRefDepth: 8
@@ -237,7 +268,9 @@ Material:
     - _UVBase: 0
     - _UVDetail: 0
     - _UVEmissive: 0
+    - _UseDither: 0
     - _UseShadowThreshold: 0
+    - _VariationModifier: 0
     - _ZTestDepthEqualForOpaque: 3
     - _ZTestGBuffer: 4
     - _ZTestModeDistortion: 8
@@ -251,19 +284,26 @@ Material:
     - Vector2_490E06B5: {r: 2.87, g: 1, b: 0, a: 0}
     - Vector2_7F197F70: {r: 8.74, g: 1, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseTint: {r: 1, g: 1, b: 1, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 1}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
+    - _MainHighlight_Color: {r: 0, g: 0, b: 0, a: 0}
+    - _RootColorPowerA: {r: 0.11029408, g: 0.10056225, b: 0.10056225, a: 0.453}
+    - _SecondaryHighlightColor: {r: 0.8862069, g: 0.8862069, b: 0.8862069, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _Tangent: {r: 1, g: 0, b: 0, a: 0}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
+    - _TipColorPowerA: {r: 0.9448277, g: 1, b: 0, a: 0.484}
     - _TransmittanceColor: {r: 1, g: 1, b: 1, a: 1}
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
+    - _VariantColor1_GlossA: {r: 0.8897059, g: 0.13083905, b: 0.13083905, a: 0.516}
+    - _Variant_Color2_GlossA: {r: 0, g: 0.13564906, b: 0.7867647, a: 0.516}
 --- !u!114 &4207518093548352573
 MonoBehaviour:
   m_ObjectHideFlags: 11
