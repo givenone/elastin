@@ -39,10 +39,12 @@ public class RayInteraction : MonoBehaviour
                     int _j = int.Parse(_name_split[2]);
                     int _k = int.Parse(_name_split[3]);
                     Vector3 _cell_key = new Vector3(_i,_j,_k);
-                    foreach (int _strand_idx in gridManager.Cell2Strand[_cell_key]){
-                        hairManager.transform.Find("hair" + _strand_idx).GetComponent<LineRenderer>().material.SetColor("_BaseColor", default_color);
+                    if (gridManager.Cell2Strand.ContainsKey(_cell_key)){
+                        foreach (int _strand_idx in gridManager.Cell2Strand[_cell_key]){
+                            hairManager.transform.Find("hair" + _strand_idx).GetComponent<LineRenderer>().material.SetColor("_BaseColor", default_color);
+                        }
+                        _selected_cell=null;
                     }
-                    _selected_cell=null;
                 }
                 
                 var selected_cell = hit.transform;
@@ -51,11 +53,12 @@ public class RayInteraction : MonoBehaviour
                 int j = int.Parse(name_split[2]);
                 int k = int.Parse(name_split[3]);
                 Vector3 cell_key = new Vector3(i,j,k);
-                foreach (int strand_idx in gridManager.Cell2Strand[cell_key]){
-                    hairManager.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>().material.SetColor("_BaseColor", selected_color);
-                }
-                _selected_cell = selected_cell;
-                
+                if (gridManager.Cell2Strand.ContainsKey(cell_key)){
+                    foreach (int strand_idx in gridManager.Cell2Strand[cell_key]){
+                        hairManager.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>().material.SetColor("_BaseColor", selected_color);
+                    }
+                    _selected_cell = selected_cell;
+                }                
             }
         }
     }
