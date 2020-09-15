@@ -9,21 +9,30 @@ public class RayInteraction : MonoBehaviour
     public GridManager gridManager;
     public HairManager hairManager;
     public float distance = 10f;
+    public bool rayEnable;
     public Transform _selected_cell;
     private Color default_color;
     private Color selected_color;
+
+    public void Toggle()
+    {
+        rayEnable = !rayEnable;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         mainCam = Camera.main;
         selected_color = Color.white;
         default_color = Color.white;
+
+        rayEnable = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)){ // left click
+        if (rayEnable && Input.GetMouseButtonDown(0)){ // flag true and left click
             RaycastHit hit;
             Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
             
