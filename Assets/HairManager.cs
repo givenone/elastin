@@ -19,7 +19,7 @@ public class HairManager : MonoBehaviour
     public int n_rendered_strand;
     List<LineRenderer> original_lines = new List<LineRenderer>();
     float length_scale = 2.0f;
-    List<int> visibilities = new List<int>();
+    List<int> visibilities = new List<int>(); // # of vertices in a strand
     Color original_color = Color.white;
     int hair_model_index = 0;
     string[] hair_models = {"curly", "short", "garma", "dandy", "long", "rocker"};
@@ -248,6 +248,128 @@ public class HairManager : MonoBehaviour
                 child.gameObject.GetComponent<LineRenderer>().material.SetColor("_BaseColor", new_BaseColor);
             }
     }
+
+    // Hair Curliness Control starts
+    // by givenone
+
+    void cCurl(float curliness=0){
+        if(rayInteraction._selected_cell== null){
+            /*
+            for (int i=0;i<n_rendered_strand;i++)
+            {
+                Transform child = this.transform.GetChild(i);
+                LineRenderer line = child.gameObject.GetComponent<LineRenderer>();
+                int n_rendered_vertex = visibilities[i];
+                int n_vertex = original_lines[i].positionCount;
+
+
+                
+                if (n_rendered_vertex+GRANULARITY <= n_vertex){
+                    for(int j=n_rendered_vertex;j<n_rendered_vertex+GRANULARITY;j++){
+                        line.SetPosition(j, original_lines[i].GetPosition(j));
+                    }
+                    for(int j=n_rendered_vertex+GRANULARITY;j<n_vertex;j++){
+                        line.SetPosition(j, original_lines[i].GetPosition(n_rendered_vertex+GRANULARITY));
+                    }
+                    visibilities[i] += GRANULARITY;
+                }
+            }
+            */
+        }
+        else{
+            string[] name_split = rayInteraction._selected_cell.name.Split('_');
+            int i = int.Parse(name_split[1]);
+            int j = int.Parse(name_split[2]);
+            int k = int.Parse(name_split[3]);
+            Vector3 _cell_key = new Vector3(i,j,k);
+            foreach (int strand_idx in gridManager.Cell2Strand[_cell_key]){
+                LineRenderer line = gameObject.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>();;
+                int n_rendered_vertex = visibilities[strand_idx];
+                
+                // 원상복귀가 가능하기 위해 original line을 기준으로 변화.
+                float lenght = 0.0f; // strand 길이
+                float threshold = 0.5f; // thrshold for a change
+                Vector3[] vertices = new Vector3[n_rendered_vertex]; // new vertices list
+
+                for(int x=0 ; x<20; x++)
+                {
+                    vertices[x] = original_lines[strand_idx].GetPosition(x);
+                }
+                
+                for(int v_idx= 20 ; v_idx < n_rendered_vertex ; v_idx++){
+
+                    Vector3 point = original_lines[strand_idx].GetPosition(v_idx);
+                    Vector3 center = new Vector3(-point.x, 0, -point.z);
+                    float dist = center.magnitude;
+
+                    Vector3 curv = (   
+                        (vertices[v_idx-1] - vertices[v_idx-2]).normalized +
+                        (vertices[v_idx-1] - original_lines[strand_idx].GetPosition(v_idx)).normalized
+                    );
+
+                    Vector3 tangent = Vector3.Normalize(original_lines[strand_idx].GetPosition(v_idx) - vertices[v_idx-1]);
+
+                    float curvature = curv.magnitude;
+                    float cos_curv = Vector3.Dot(curv, center) / (dist * curvature);
+                    float cos_tangent = Vector3.Dot(tangent, center);
+
+                    Debug.Log("curv :" + curv);
+                    Debug.Log("curvature :" + curvature);
+                    Debug.Log("cos_curv :" + cos_curv);
+                    Debug.Log("cos_tan :" + cos_tangent);
+
+                    if((cos_curv < 0) && (cos_tangent > 0)  && (curvature > threshold + v_idx / n_rendered_vertex))
+                    {
+                        // test
+                        vertices[v_idx] = original_lines[strand_idx].GetPosition(v_idx) - curliness * ((center / dist) / 2) ; // + 0.1f * (curv * dist / 2);
+                    }
+                    else
+                    {
+                        vertices[v_idx] = original_lines[strand_idx].GetPosition(v_idx);
+                    }
+                    
+                }
+                // Cell2Strand Dictionary 변경 해줘야 함 (point들의 위치가 변하기 때문)
+
+                for(int x=20; x<n_rendered_vertex; x++)
+                {
+                    line.SetPosition(x, vertices[x]);
+                }
+            }
+        }
+    }    
+
+    // 머리카락을 특정 vertex (ex 50) 번째부터 쭉 펴는 함수.
+    public void Straight()
+    {
+        int n_vertex_threshold = 21;
+        if(rayInteraction._selected_cell== null){
+            for (int i=0;i<n_rendered_strand;i++)
+            {
+                Transform child = this.transform.GetChild(i);
+                LineRenderer line = child.gameObject.GetComponent<LineRenderer>();
+                int n_rendered_vertex = visibilities[i];
+                int n_vertex = original_lines[i].positionCount;
+                Debug.Log(n_rendered_vertex);
+                if(n_rendered_vertex < n_vertex_threshold) continue;
+
+                Vector3 tangent = (original_lines[i].GetPosition(n_vertex_threshold-1) - original_lines[i].GetPosition(n_vertex_threshold-2)).normalized;
+                for(int j=n_vertex_threshold ; j<n_rendered_vertex ; j++){
+                    float delta = (original_lines[i].GetPosition(j) - original_lines[i].GetPosition(j-1)).magnitude;  
+                    line.SetPosition(j, line.GetPosition(j-1) + tangent * delta);
+                }                
+            }
+        }
+    }
+
+    public void Curly(){ // from slider 2
+        float curliness = slider2.value;
+        cCurl(curliness);
+    }
+    // Hair Curliness Control ends
+
+
+
     void Start(){
         string filename ="Assets/demo_files/hair_models/"+ hair_models[hair_model_index] +".data";
         GenerateModel(filename);
