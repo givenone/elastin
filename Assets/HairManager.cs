@@ -15,7 +15,7 @@ public class HairManager : MonoBehaviour
     public GridManager gridManager;
     public RayInteraction rayInteraction;
     public Slider slider1, slider2;
-    public Dropdown curl; // Dropdown
+    public Dropdown curl; // Dropdown for curl style.
     
     public int n_rendered_strand;
     List<LineRenderer> original_lines = new List<LineRenderer>();
@@ -254,11 +254,12 @@ public class HairManager : MonoBehaviour
     // by givenone
 
     void cCurl(float curliness=0){
-        
-        int no_change_index = 15;
+        // curliness : 0 ~ 1
+        curliness = curliness / (5 + curliness);
+        int no_change_index = 15; // ( should be > 0 )
         int up_index = 35;
+        float scale = 350f; // 컬 말리는 정도 : 클 수록 덜 말려 올라감.
         
-
         if(true){ // 일괄 적용 테스트 (선택 X)
             
             for (int i=0;i<n_rendered_strand;i++)
@@ -270,29 +271,46 @@ public class HairManager : MonoBehaviour
 
                 for(int x=0 ; x<no_change_index; x++)
                 {
-                    // 변화 X
+                    // 변화 없음. (C Curl은 끝에서만 변함.)
                     //vertices[x] = original_lines[strand_idx].GetPosition(x);
                 }
                 
                 for(int v_idx= no_change_index ; v_idx < n_rendered_vertex ; v_idx++){
 
                     Vector3 point = line.GetPosition(v_idx);
+                    Vector3 prev_point = original_lines[i].GetPosition(v_idx - 1);
                     Vector3 center = new Vector3(-point.x, 0, -point.z);
-                    float dist = center.magnitude;
+                    center = center.normalized;
+                    float length = (prev_point - point).magnitude;
+                    float mag = ((float)(v_idx - no_change_index ) / (float)(n_rendered_vertex + 10));
+                    mag = mag * mag; // 2차원 증가. (컬 세기 증가 속도를 끝으로 갈수록 더 증가하기 위함.)
 
-                    point = point + center * dist * curliness * (v_idx - no_change_index) / n_rendered_vertex; 
+                    Vector3 direction = (point + center * curliness * mag) - prev_point; // 움직일 점 - 이전 점
+
+                    // 길이 조정 (원래 길이 유지)
+                    point = prev_point + direction.normalized * length;
                     line.SetPosition(v_idx, point);
                 }
 
+                // 끝이 더 말리는 효과 ( up 방향 (+y & center) 로 말리는 효과)
                 for(int v_idx = up_index; v_idx < n_rendered_vertex; v_idx++)
                 {
                     Vector3 point = line.GetPosition(v_idx);
-                    Vector3 up = new Vector3(0, 1, 0);
-                    float scale = 350f;
-                    point = point + up * curliness * (v_idx - up_index) / scale; 
+                    Vector3 prev_point = line.GetPosition(v_idx - 1);
+                    //Vector3 up = new Vector3(0, 1, 0); // TODO :: C curl의 방향을 꼭 위쪽이 아닌 유저 인풋(in 2차원 plane!)으로 지정해줄 수 있도록 설정하면 좋을 듯 ! (그리는 인터페이스 !)
+                    Vector3 up = new Vector3(-point.x, 0, -point.z);
+                    up = up.normalized;
+                    up.y = 1f;
+                    up = up.normalized;
+                    float length = (original_lines[i].GetPosition(v_idx) - original_lines[i].GetPosition(v_idx - 1)).magnitude;
+                    float mag = ((float)(v_idx - up_index) / (float)(n_rendered_vertex - 10));
+                    mag = mag * mag;
+
+                    Vector3 direction = (point + up * curliness * mag ) - prev_point;
+
+                    point = prev_point + direction.normalized * length;
+
                     line.SetPosition(v_idx, point);
-
-
                 }
             }
             
@@ -380,13 +398,20 @@ public class HairManager : MonoBehaviour
                 for(int v_idx= no_change_index ; v_idx < n_rendered_vertex ; v_idx++){
 
                     Vector3 point = line.GetPosition(v_idx);
+                    Vector3 prev_point = original_lines[i].GetPosition(v_idx-1);
+                    float length = (prev_point - point).magnitude;
                     Vector3 center = new Vector3(-point.x, 0, -point.z);
-                    float dist = center.magnitude;
+                    center = center.normalized;
 
-                    if( (v_idx / change_cycle) % 2 == 0) dist *= -1; // change direction
-                    int mag = change_cycle / 2 - Math.Abs(v_idx % change_cycle - change_cycle / 2);
+                    if( (v_idx / change_cycle) % 2 == 0) center *= -1; // change direction
+                    int mag_index = change_cycle / 2 - Math.Abs(v_idx % change_cycle - change_cycle / 2);
+                    float mag = ((float)mag_index / (float)change_cycle) * ((float)mag_index / (float)change_cycle);
+                    mag *= ((v_idx + 10) / n_rendered_vertex) * ((v_idx + 10) / n_rendered_vertex);
 
-                    point = point + center * dist * curliness * (v_idx + 10) / n_rendered_vertex * mag / 5; 
+                    Vector3 direction = (point + center  * curliness *  mag) - prev_point;
+
+                    // 길이 조정 (원래 길이 유지)
+                    point = prev_point + direction.normalized * length; 
                     line.SetPosition(v_idx, point);
                 }
             }
