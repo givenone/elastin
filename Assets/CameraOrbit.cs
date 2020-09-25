@@ -21,11 +21,13 @@ public class CameraOrbit : MonoBehaviour
 
     public float MouseSensitivity = 10f;
     public float TranslationSensitivity = 0.1f;
-    public float ScrollSensitvity = 10f;
+    public float ScrollSensitvity = 20f;
     public float OrbitDampening = 0.5f;
     public float ScrollDampening = 1f;
 
     public bool CameraDisabled = false;
+
+    public HairManager hairManager;
 
     public void Toggle()
     {
@@ -38,6 +40,8 @@ public class CameraOrbit : MonoBehaviour
         this.Rot = initialRot;
         this.Position = initialPosition;
         this._CameraDistance = 1f;
+
+        hairManager.ResetHair();
     }
     // Start is called before the first frame update
     void Start()

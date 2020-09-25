@@ -15,6 +15,7 @@ public class HairManager : MonoBehaviour
     public GridManager gridManager;
     public RayInteraction rayInteraction;
     public Slider slider1, slider2;
+    public Dropdown curl; // Dropdown
     
     public int n_rendered_strand;
     List<LineRenderer> original_lines = new List<LineRenderer>();
@@ -92,9 +93,9 @@ public class HairManager : MonoBehaviour
                         }
                     }
                 }
-                Debug.Log("x " + min_x + '~' + max_x);
-                Debug.Log("y " + min_y + '~' + max_y);
-                Debug.Log("z " + min_z + '~' + max_z);
+                //Debug.Log("x " + min_x + '~' + max_x);
+                //Debug.Log("y " + min_y + '~' + max_y);
+                //Debug.Log("z " + min_z + '~' + max_z);
                 gridManager.GenerateGrid( min_x,  max_x,  min_y,  max_y,  min_z,  max_z);
             }
         }
@@ -227,7 +228,7 @@ public class HairManager : MonoBehaviour
                 visibilities[i] = 1;
             }
     }
-    void ResetHair(){
+    public void ResetHair(){
         for (int i=0;i<n_rendered_strand;i++)
             {
                 Transform child = this.transform.GetChild(i);
@@ -253,8 +254,13 @@ public class HairManager : MonoBehaviour
     // by givenone
 
     void cCurl(float curliness=0){
-        if(rayInteraction._selected_cell== null){
-            /*
+        
+        int no_change_index = 15;
+        int up_index = 35;
+        
+
+        if(true){ // 일괄 적용 테스트 (선택 X)
+            
             for (int i=0;i<n_rendered_strand;i++)
             {
                 Transform child = this.transform.GetChild(i);
@@ -262,20 +268,36 @@ public class HairManager : MonoBehaviour
                 int n_rendered_vertex = visibilities[i];
                 int n_vertex = original_lines[i].positionCount;
 
-
+                for(int x=0 ; x<no_change_index; x++)
+                {
+                    // 변화 X
+                    //vertices[x] = original_lines[strand_idx].GetPosition(x);
+                }
                 
-                if (n_rendered_vertex+GRANULARITY <= n_vertex){
-                    for(int j=n_rendered_vertex;j<n_rendered_vertex+GRANULARITY;j++){
-                        line.SetPosition(j, original_lines[i].GetPosition(j));
-                    }
-                    for(int j=n_rendered_vertex+GRANULARITY;j<n_vertex;j++){
-                        line.SetPosition(j, original_lines[i].GetPosition(n_rendered_vertex+GRANULARITY));
-                    }
-                    visibilities[i] += GRANULARITY;
+                for(int v_idx= no_change_index ; v_idx < n_rendered_vertex ; v_idx++){
+
+                    Vector3 point = line.GetPosition(v_idx);
+                    Vector3 center = new Vector3(-point.x, 0, -point.z);
+                    float dist = center.magnitude;
+
+                    point = point + center * dist * curliness * (v_idx - no_change_index) / n_rendered_vertex; 
+                    line.SetPosition(v_idx, point);
+                }
+
+                for(int v_idx = up_index; v_idx < n_rendered_vertex; v_idx++)
+                {
+                    Vector3 point = line.GetPosition(v_idx);
+                    Vector3 up = new Vector3(0, 1, 0);
+                    float scale = 350f;
+                    point = point + up * curliness * (v_idx - up_index) / scale; 
+                    line.SetPosition(v_idx, point);
+
+
                 }
             }
-            */
+            
         }
+        /*
         else{
             string[] name_split = rayInteraction._selected_cell.name.Split('_');
             int i = int.Parse(name_split[1]);
@@ -336,21 +358,56 @@ public class HairManager : MonoBehaviour
                     line.SetPosition(x, vertices[x]);
                 }
             }
-        }
-    }    
+        }*/
+    }
 
-    // 머리카락을 특정 vertex (ex 50) 번째부터 쭉 펴는 함수.
-    public void Straight()
+    void sCurl(float curliness)
     {
-        int n_vertex_threshold = 21;
-        if(rayInteraction._selected_cell== null){
+
+        int no_change_index = 10;
+        int change_cycle = 5;
+
+        if(true){ // 일괄 적용 테스트 (선택 X)
+            
             for (int i=0;i<n_rendered_strand;i++)
             {
                 Transform child = this.transform.GetChild(i);
                 LineRenderer line = child.gameObject.GetComponent<LineRenderer>();
                 int n_rendered_vertex = visibilities[i];
                 int n_vertex = original_lines[i].positionCount;
-                Debug.Log(n_rendered_vertex);
+
+                
+                for(int v_idx= no_change_index ; v_idx < n_rendered_vertex ; v_idx++){
+
+                    Vector3 point = line.GetPosition(v_idx);
+                    Vector3 center = new Vector3(-point.x, 0, -point.z);
+                    float dist = center.magnitude;
+
+                    if( (v_idx / change_cycle) % 2 == 0) dist *= -1; // change direction
+                    int mag = change_cycle / 2 - Math.Abs(v_idx % change_cycle - change_cycle / 2);
+
+                    point = point + center * dist * curliness * (v_idx + 10) / n_rendered_vertex * mag / 5; 
+                    line.SetPosition(v_idx, point);
+                }
+            }
+            
+        }
+
+    }    
+
+    // 머리카락을 특정 vertex (ex 50) 번째부터 쭉 펴는 함수.
+    public void Straight()
+    {
+        int n_vertex_threshold = 20; // 펴기 시작하는 vertex 번호.
+
+        if(true){
+            for (int i=0;i<n_rendered_strand;i++)
+            {
+                Transform child = this.transform.GetChild(i);
+                LineRenderer line = child.gameObject.GetComponent<LineRenderer>();
+                int n_rendered_vertex = visibilities[i];
+                int n_vertex = original_lines[i].positionCount;
+                //Debug.Log(n_rendered_vertex);
                 if(n_rendered_vertex < n_vertex_threshold) continue;
 
                 Vector3 tangent = (original_lines[i].GetPosition(n_vertex_threshold-1) - original_lines[i].GetPosition(n_vertex_threshold-2)).normalized;
@@ -363,8 +420,24 @@ public class HairManager : MonoBehaviour
     }
 
     public void Curly(){ // from slider 2
-        float curliness = slider2.value;
-        cCurl(curliness);
+        int style = curl.value;
+        float curliness = 2.0f; // hard-coded.
+        Debug.Log("Curly " + style);
+
+        if (style == 0){ // reset
+            ResetHair();
+            Straight();
+        }
+
+        else if(style == 1){
+            //curl.captionText = "C Curl";
+            cCurl(curliness);
+        }
+
+        else if(style == 2){
+            //curl.captionText = "S Curl";
+            sCurl(curliness);
+        }   
     }
     // Hair Curliness Control ends
 
