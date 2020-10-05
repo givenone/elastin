@@ -93,10 +93,11 @@ public class HairManager : MonoBehaviour
                         }
                     }
                 }
-                //Debug.Log("x " + min_x + '~' + max_x);
-                //Debug.Log("y " + min_y + '~' + max_y);
-                //Debug.Log("z " + min_z + '~' + max_z);
-                gridManager.GenerateGrid( min_x,  max_x,  min_y,  max_y,  min_z,  max_z);
+
+                float dx = (max_x - min_x) / 2;
+                float dy = (max_y - min_y) / 2;
+                float dz = (max_z - min_z) / 2;
+                gridManager.GenerateGrid(min_x - dx,  max_x + dx,  min_y - dy,  max_y + dy,  min_z - dz,  max_z + dz);
             }
         }
         else{
@@ -160,6 +161,8 @@ public class HairManager : MonoBehaviour
                 }
             }
         }
+
+        gridManager.ChangeGrid();
     }
     void GrowHair(int GRANULARITY=3){
         if(rayInteraction._selected_cell== null){
@@ -201,6 +204,9 @@ public class HairManager : MonoBehaviour
                 }
             }
         }
+
+        gridManager.ChangeGrid();
+
     }
     public void ChangeLength(){ // from slider 1
         float granularity = (slider1.value - length_scale)*25;
@@ -230,16 +236,18 @@ public class HairManager : MonoBehaviour
     }
     public void ResetHair(){
         for (int i=0;i<n_rendered_strand;i++)
-            {
-                Transform child = this.transform.GetChild(i);
-                LineRenderer line = child.gameObject.GetComponent<LineRenderer>();
-                int n_vertex = original_lines[i].positionCount;
-                for(int j=0;j<n_vertex;j++){
-                    line.SetPosition(j, original_lines[i].GetPosition(j));
-                }
-                line.material.SetColor("_BaseColor", original_color);
-                visibilities[i] = n_vertex;
+        {
+            Transform child = this.transform.GetChild(i);
+            LineRenderer line = child.gameObject.GetComponent<LineRenderer>();
+            int n_vertex = original_lines[i].positionCount;
+            for(int j=0;j<n_vertex;j++){
+                line.SetPosition(j, original_lines[i].GetPosition(j));
             }
+            line.material.SetColor("_BaseColor", original_color);
+            visibilities[i] = n_vertex;
+        }
+
+        gridManager.ChangeGrid();
             
     }
     public void DyeHair(Color new_BaseColor){
@@ -312,68 +320,7 @@ public class HairManager : MonoBehaviour
             }
             
         }
-        /*
-        else{
-            string[] name_split = rayInteraction._selected_cell.name.Split('_');
-            int i = int.Parse(name_split[1]);
-            int j = int.Parse(name_split[2]);
-            int k = int.Parse(name_split[3]);
-            Vector3 _cell_key = new Vector3(i,j,k);
-            foreach (int strand_idx in gridManager.Cell2Strand[_cell_key]){
-                LineRenderer line = gameObject.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>();;
-                int n_rendered_vertex = visibilities[strand_idx];
-                
-                // 원상복귀가 가능하기 위해 original line을 기준으로 변화.
-                float lenght = 0.0f; // strand 길이
-                float threshold = 0.5f; // thrshold for a change
-                Vector3[] vertices = new Vector3[n_rendered_vertex]; // new vertices list
-
-                for(int x=0 ; x<20; x++)
-                {
-                    vertices[x] = original_lines[strand_idx].GetPosition(x);
-                }
-                
-                for(int v_idx= 20 ; v_idx < n_rendered_vertex ; v_idx++){
-
-                    Vector3 point = original_lines[strand_idx].GetPosition(v_idx);
-                    Vector3 center = new Vector3(-point.x, 0, -point.z);
-                    float dist = center.magnitude;
-
-                    Vector3 curv = (   
-                        (vertices[v_idx-1] - vertices[v_idx-2]).normalized +
-                        (vertices[v_idx-1] - original_lines[strand_idx].GetPosition(v_idx)).normalized
-                    );
-
-                    Vector3 tangent = Vector3.Normalize(original_lines[strand_idx].GetPosition(v_idx) - vertices[v_idx-1]);
-
-                    float curvature = curv.magnitude;
-                    float cos_curv = Vector3.Dot(curv, center) / (dist * curvature);
-                    float cos_tangent = Vector3.Dot(tangent, center);
-
-                    Debug.Log("curv :" + curv);
-                    Debug.Log("curvature :" + curvature);
-                    Debug.Log("cos_curv :" + cos_curv);
-                    Debug.Log("cos_tan :" + cos_tangent);
-
-                    if((cos_curv < 0) && (cos_tangent > 0)  && (curvature > threshold + v_idx / n_rendered_vertex))
-                    {
-                        // test
-                        vertices[v_idx] = original_lines[strand_idx].GetPosition(v_idx) - curliness * ((center / dist) / 2) ; // + 0.1f * (curv * dist / 2);
-                    }
-                    else
-                    {
-                        vertices[v_idx] = original_lines[strand_idx].GetPosition(v_idx);
-                    }
-                    
-                }
-                // Cell2Strand Dictionary 변경 해줘야 함 (point들의 위치가 변하기 때문)
-
-                for(int x=20; x<n_rendered_vertex; x++)
-                {
-                    line.SetPosition(x, vertices[x]);
-                }
-            }
-        }*/
+        gridManager.ChangeGrid();
     }
 
     void sCurl(float curliness=0)
@@ -421,14 +368,14 @@ public class HairManager : MonoBehaviour
             }
             
         }
-
+        gridManager.ChangeGrid();
     }    
 
     // 머리카락을 특정 vertex (ex 50) 번째부터 쭉 펴는 함수.
     public void Straight()
     {
         int n_vertex_threshold = 20; // 펴기 시작하는 vertex 번호.
-
+        
         if(true){
             for (int i=0;i<n_rendered_strand;i++)
             {
@@ -446,6 +393,8 @@ public class HairManager : MonoBehaviour
                 }                
             }
         }
+
+        gridManager.ChangeGrid();
     }
 
     public void Curly(){ // from slider 2
