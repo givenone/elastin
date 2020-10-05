@@ -14,6 +14,13 @@ public class RayInteraction : MonoBehaviour
     private Color default_color;
     private Color selected_color;
 
+    private int mode;
+
+    public void ToggleMode()
+    {
+        
+    }
+
     public void Toggle()
     {
         rayEnable = !rayEnable;
@@ -27,6 +34,7 @@ public class RayInteraction : MonoBehaviour
         default_color = Color.white;
 
         rayEnable = true;
+        mode = 0;
     }
 
     // Update is called once per frame

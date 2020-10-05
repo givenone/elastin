@@ -16,6 +16,8 @@ public class HairManager : MonoBehaviour
     public RayInteraction rayInteraction;
     public Slider slider1, slider2;
     public Dropdown curl; // Dropdown for curl style.
+    public GameObject sCurlOption;
+    public GameObject cCurlOption;
     
     public int n_rendered_strand;
     List<LineRenderer> original_lines = new List<LineRenderer>();
@@ -26,6 +28,8 @@ public class HairManager : MonoBehaviour
     string[] hair_models = {"curly", "short", "garma", "dandy", "long", "rocker"};
     float max_x=float.NegativeInfinity, max_y=float.NegativeInfinity, max_z=float.NegativeInfinity;
     float min_x=float.PositiveInfinity, min_y=float.PositiveInfinity, min_z=float.PositiveInfinity;
+
+    List<Vector3> scalp = new List<Vector3>(); // 두피 좌표
 
     // Start is called before the first frame update
     public void GenerateModel(string filename)
@@ -58,6 +62,10 @@ public class HairManager : MonoBehaviour
                             x = reader.ReadSingle();
                             y = reader.ReadSingle();
                             z = reader.ReadSingle();
+                            if(j == 0){
+                                scalp.Add(new Vector3(x, y, z)); // 두피 좌표 (첫 점)
+                            }
+
                             if(j % skip_factor == 0 && vertex_count < n_rendered_vertex/skip_factor){
                                 x = x + cx -hx;
                                 y = y + cy -hy;
@@ -128,7 +136,6 @@ public class HairManager : MonoBehaviour
         };
     }
     void TrimHair(int GRANULARITY=3){
-        Debug.Log(rayInteraction._selected_strands.Count);
         if(rayInteraction._selected_strands.Count == 0){
             // 모든 머리카락에 대해
             for (int i=0;i<n_rendered_strand;i++)
@@ -248,22 +255,25 @@ public class HairManager : MonoBehaviour
             
     }
     public void DyeHair(Color new_BaseColor){
-        for (int i=0;i<n_rendered_strand;i++)
-            {
-                Transform child = this.transform.GetChild(i);
-                child.gameObject.GetComponent<LineRenderer>().material.SetColor("_BaseColor", new_BaseColor);
-            }
+        if(rayInteraction._selected_strands.Count == 0){
+            for (int i=0;i<n_rendered_strand;i++)
+                {
+                    Transform child = this.transform.GetChild(i);
+                    child.gameObject.GetComponent<LineRenderer>().material.SetColor("_BaseColor", new_BaseColor);
+                }
+        }
     }
 
     // Hair Curliness Control starts
     // by givenone
 
-    void cCurl(float curliness=0){
-        // curliness : 0 ~ 1
+    public void cCurl(){
+        float curliness = cCurlOption.transform.Find("curliness").GetComponent<Slider>().value;
         curliness = curliness / (5 + curliness);
-        int no_change_index = 15; // ( should be > 0 )
-        int up_index = 35;
-        float C_strongness = 1f;
+        int no_change_index = (int)cCurlOption.transform.Find("start").GetComponent<Slider>().value;
+        int up_index = (int)cCurlOption.transform.Find("cStart").GetComponent<Slider>().value;
+        float C_strongness = cCurlOption.transform.Find("cStrong").GetComponent<Slider>().value;
+        
         
         if(true){ // 일괄 적용 테스트 (선택 X)
             
@@ -320,14 +330,16 @@ public class HairManager : MonoBehaviour
         gridManager.ChangeGrid();
     }
 
-    void sCurl(float curliness=0)
+    public void sCurl()
     {
+        float curliness = sCurlOption.transform.Find("curliness").GetComponent<Slider>().value;
         curliness = curliness / (25 + curliness);
         curliness /= 2;
-        int no_change_index = 20;
-        int change_cycle = 5;
+        int no_change_index = (int)sCurlOption.transform.Find("start").GetComponent<Slider>().value;
+        int stop_change_index = (int)sCurlOption.transform.Find("stop").GetComponent<Slider>().value;
+        int change_cycle = (int)sCurlOption.transform.Find("cycle").GetComponent<Slider>().value;
 
-        if(true){ // 일괄 적용 테스트 (선택 X)
+        if(true){ // 일괄 적용
             
             for (int i=0;i<n_rendered_strand;i++)
             {
@@ -336,8 +348,9 @@ public class HairManager : MonoBehaviour
                 int n_rendered_vertex = visibilities[i];
                 int n_vertex = original_lines[i].positionCount;
 
-                
-                for(int v_idx= no_change_index ; v_idx < n_rendered_vertex ; v_idx++){
+
+
+                for(int v_idx= no_change_index ; v_idx < (stop_change_index > n_rendered_vertex ? n_rendered_vertex : stop_change_index) ; v_idx++){
 
                     Vector3 point = line.GetPosition(v_idx);
                     Vector3 prev_point = line.GetPosition(v_idx-1);
@@ -394,28 +407,26 @@ public class HairManager : MonoBehaviour
         gridManager.ChangeGrid();
     }
 
-    public void Curly(){ // from slider 2
-        int style = curl.value;
-        float curliness = 2.0f; // hard-coded.
-
+    public void Curly(){ // from slider 2  
+        int style = curl.value;      
         if (style == 0){ // reset
-            ResetHair();
-            Straight();
+            sCurlOption.SetActive(false);
+            cCurlOption.SetActive(false);
+
         }
 
         else if(style == 1){
-            //curl.captionText = "C Curl";
-            cCurl(curliness);
+            sCurlOption.SetActive(false);
+            cCurlOption.SetActive(true);
         }
 
         else if(style == 2){
-            //curl.captionText = "S Curl";
-            sCurl(curliness);
+            sCurlOption.SetActive(true);
+            cCurlOption.SetActive(false);
+
         }   
     }
     // Hair Curliness Control ends
-
-
 
     void Start(){
         string filename ="Assets/demo_files/hair_models/"+ hair_models[hair_model_index] +".data";
