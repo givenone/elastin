@@ -128,7 +128,9 @@ public class HairManager : MonoBehaviour
         };
     }
     void TrimHair(int GRANULARITY=3){
-        if(rayInteraction._selected_cell== null){
+        Debug.Log(rayInteraction._selected_strands.Count);
+        if(rayInteraction._selected_strands.Count == 0){
+            // 모든 머리카락에 대해
             for (int i=0;i<n_rendered_strand;i++)
             {
                 Transform child = this.transform.GetChild(i);
@@ -144,12 +146,9 @@ public class HairManager : MonoBehaviour
             }
         }
         else{
-            string[] name_split = rayInteraction._selected_cell.name.Split('_');
-            int i = int.Parse(name_split[1]);
-            int j = int.Parse(name_split[2]);
-            int k = int.Parse(name_split[3]);
-            Vector3 _cell_key = new Vector3(i,j,k);
-            foreach (int strand_idx in gridManager.Cell2Strand[_cell_key]){
+            // 선택된 머리카락만
+            foreach(int strand_idx in rayInteraction._selected_strands)
+            {
                 LineRenderer line = gameObject.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>();;
                 int n_rendered_vertex = visibilities[strand_idx];
                 int n_vertex = original_lines[strand_idx].positionCount;
@@ -165,7 +164,7 @@ public class HairManager : MonoBehaviour
         gridManager.ChangeGrid();
     }
     void GrowHair(int GRANULARITY=3){
-        if(rayInteraction._selected_cell== null){
+        if(rayInteraction._selected_strands.Count == 0){
             for (int i=0;i<n_rendered_strand;i++)
             {
                 Transform child = this.transform.GetChild(i);
@@ -184,23 +183,20 @@ public class HairManager : MonoBehaviour
             }
         }
         else{
-            string[] name_split = rayInteraction._selected_cell.name.Split('_');
-            int i = int.Parse(name_split[1]);
-            int j = int.Parse(name_split[2]);
-            int k = int.Parse(name_split[3]);
-            Vector3 _cell_key = new Vector3(i,j,k);
-            foreach (int strand_idx in gridManager.Cell2Strand[_cell_key]){
+            foreach(int strand_idx in rayInteraction._selected_strands)
+            {
+                
                 LineRenderer line = gameObject.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>();;
                 int n_rendered_vertex = visibilities[strand_idx];
                 int n_vertex = original_lines[strand_idx].positionCount;
                 if (n_rendered_vertex+GRANULARITY <= n_vertex){
                     for(int v_idx=n_rendered_vertex;v_idx<n_rendered_vertex+GRANULARITY;v_idx++){
-                        line.SetPosition(v_idx, original_lines[i].GetPosition(v_idx));
+                        line.SetPosition(v_idx, original_lines[strand_idx].GetPosition(v_idx));
                     }
                     for(int v_idx=n_rendered_vertex+GRANULARITY;v_idx<n_vertex;v_idx++){
-                        line.SetPosition(v_idx, original_lines[i].GetPosition(n_rendered_vertex+GRANULARITY));
+                        line.SetPosition(v_idx, original_lines[strand_idx].GetPosition(n_rendered_vertex+GRANULARITY));
                     }
-                    visibilities[i] += GRANULARITY;
+                    visibilities[strand_idx] += GRANULARITY;
                 }
             }
         }
@@ -248,6 +244,7 @@ public class HairManager : MonoBehaviour
         }
 
         gridManager.ChangeGrid();
+        rayInteraction.ResetList();
             
     }
     public void DyeHair(Color new_BaseColor){
