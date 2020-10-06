@@ -136,7 +136,7 @@ public class HairManager : MonoBehaviour
         };
     }
     void TrimHair(int GRANULARITY=3){
-        if(rayInteraction._selected_strands.Count == 0){
+        if(true/*rayInteraction._selected_strands.Count == 0*/){
             // 모든 머리카락에 대해
             for (int i=0;i<n_rendered_strand;i++)
             {
@@ -168,7 +168,7 @@ public class HairManager : MonoBehaviour
             }
         }
 
-        gridManager.ChangeGrid();
+        //gridManager.ChangeGrid();
     }
     void GrowHair(int GRANULARITY=3){
         if(rayInteraction._selected_strands.Count == 0){
@@ -385,7 +385,7 @@ public class HairManager : MonoBehaviour
     public void Straight()
     {
         int n_vertex_threshold = 20; // 펴기 시작하는 vertex 번호.
-        
+        Vector3 down = new Vector3(0, 0, -1);
         if(true){
             for (int i=0;i<n_rendered_strand;i++)
             {
@@ -395,11 +395,12 @@ public class HairManager : MonoBehaviour
                 int n_vertex = original_lines[i].positionCount;
                 //Debug.Log(n_rendered_vertex);
                 if(n_rendered_vertex < n_vertex_threshold) continue;
-
+                
                 Vector3 tangent = (original_lines[i].GetPosition(n_vertex_threshold-1) - original_lines[i].GetPosition(n_vertex_threshold-2)).normalized;
                 for(int j=n_vertex_threshold ; j<n_rendered_vertex ; j++){
-                    float delta = (original_lines[i].GetPosition(j) - original_lines[i].GetPosition(j-1)).magnitude;  
-                    line.SetPosition(j, line.GetPosition(j-1) + tangent * delta);
+                    float delta = (original_lines[i].GetPosition(j) - original_lines[i].GetPosition(j-1)).magnitude;  // 길이
+                    Vector3 dir = down * j + tangent * (n_rendered_vertex - j); 
+                    line.SetPosition(j, line.GetPosition(j-1) + dir.normalized * delta);
                 }                
             }
         }
