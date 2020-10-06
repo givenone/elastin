@@ -9,6 +9,7 @@ public class DrawLine : MonoBehaviour
     private LineRenderer lineRenderer;
     private GameObject line;
     public List<Vector3> dotPositions;
+
     private float maxLength = 10f;
     private float linelength;
     private bool onCanvas = false;
@@ -47,7 +48,7 @@ public class DrawLine : MonoBehaviour
             }
             else if(onCanvas && Input.GetMouseButton(0))
             {
-                if(Vector3.Distance(mouse_world_position, dotPositions[dotPositions.Count - 1]) > 0.01f){ // 너무 라인 많이 생기지 않도록.
+                if(Vector3.Distance(mouse_world_position, dotPositions[dotPositions.Count - 1]) > 0.002f){ // 너무 라인 많이 생기지 않도록.
                     // Line 이어주기.
                     dotPositions.Add(mouse_world_position);
                     updateLine();
@@ -65,7 +66,7 @@ public class DrawLine : MonoBehaviour
     {
         line = GameObject.Instantiate(linePrefab);     
         lineRenderer = line.GetComponent<LineRenderer>();
-        lineRenderer.SetWidth(0.005f, 0.005f);
+        lineRenderer.SetWidth(0.01f, 0.01f);
         lineRenderer.SetPosition(0, dotPositions[0]);
         lineRenderer.positionCount = 1;
     }

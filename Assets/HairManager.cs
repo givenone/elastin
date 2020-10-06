@@ -13,6 +13,7 @@ public class HairManager : MonoBehaviour
     public GameObject hair;
     public GameObject cache;
     public GridManager gridManager;
+    public DrawLine drawline; // freecurl 함수 구현.
     public RayInteraction rayInteraction;
     public Slider slider1, slider2;
     public Dropdown curl; // Dropdown for curl style.
@@ -204,8 +205,7 @@ public class HairManager : MonoBehaviour
         }
         else{
             foreach(int strand_idx in rayInteraction._selected_strands)
-            {
-                
+            {                
                 LineRenderer line = gameObject.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>();;
                 int n_rendered_vertex = visibilities[strand_idx];
                 int n_vertex = original_lines[strand_idx].positionCount;
@@ -425,8 +425,33 @@ public class HairManager : MonoBehaviour
     // 선택된 영역이 있어야만 작동하도록 설정.
     public void FreeCurl(){
 
+        int normalize_factor = 1;
+        List<Vector3> tangent = new List<Vector3>();
+        int lineLength = drawline.dotPositions.Count;
 
+        if(rayInteraction._selected_strands.Count == 0 || lineLength == 0) return;        
+        Vector3 prev = drawline.dotPositions[0];
 
+        for(int i= normalize_factor; i<lineLength; i+=normalize_factor){
+            tangent.Add ( (drawline.dotPositions[i] - prev).normalized );
+            prev = drawline.dotPositions[i];
+        } // tangent를 계산 (world 좌표 기준임.)
+
+        foreach(int strand_idx in rayInteraction._selected_strands)
+        {                
+            LineRenderer line = gameObject.transform.Find("hair" + strand_idx).GetComponent<LineRenderer>();;
+            int n_rendered_vertex = visibilities[strand_idx];
+            for(int v_idx=1; v_idx<n_rendered_vertex; v_idx++)
+            {
+                Vector3 point = line.GetPosition(v_idx);
+                Vector3 prev_point = line.GetPosition(v_idx-1);
+                float length = (original_lines[strand_idx].GetPosition(v_idx) - original_lines[strand_idx].GetPosition(v_idx - 1)).magnitude;
+                Vector3 direction = tangent[(int)(((float)v_idx / n_rendered_vertex) * (lineLength-1) / normalize_factor)];
+                point = prev_point + direction * length; 
+                line.SetPosition(v_idx, point);
+            }
+        }
+        gridManager.ChangeGrid();
     }
 
     public void Curly(){ 
