@@ -421,25 +421,40 @@ public class HairManager : MonoBehaviour
         gridManager.ChangeGrid();
     }
 
-    public void Curly(){ // from slider 2  
-        int style = curl.value;      
-        if (style == 0){ // reset
+    // Drawing 내용을 기반으로 Curl 조정.
+    // 선택된 영역이 있어야만 작동하도록 설정.
+    public void FreeCurl(){
+
+
+
+    }
+
+    public void Curly(){ 
+        int style = curl.value;
+
+        if (style == 0){
+            sCurlOption.SetActive(false);
+            cCurlOption.SetActive(false);
+            DrawCanvas.SetActive(false);
+        }  
+        else if (style == 1){ // reset
+            Straight();
             sCurlOption.SetActive(false);
             cCurlOption.SetActive(false);
             DrawCanvas.SetActive(false);
         }
-        else if(style == 1){
+        else if(style == 2){
             sCurlOption.SetActive(false);
             cCurlOption.SetActive(true);
             DrawCanvas.SetActive(false);
         }
 
-        else if(style == 2){
+        else if(style == 3){
             sCurlOption.SetActive(true);
             cCurlOption.SetActive(false);
             DrawCanvas.SetActive(false);
         }
-        else if(style == 3){
+        else if(style == 4){
             sCurlOption.SetActive(false);
             cCurlOption.SetActive(false);
             DrawCanvas.SetActive(true);

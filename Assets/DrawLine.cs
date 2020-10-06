@@ -8,7 +8,7 @@ public class DrawLine : MonoBehaviour
      
     private LineRenderer lineRenderer;
     private GameObject line;
-    private List<Vector3> dotPositions;
+    public List<Vector3> dotPositions;
     private float maxLength = 10f;
     private float linelength;
     private bool onCanvas = false;
@@ -42,6 +42,8 @@ public class DrawLine : MonoBehaviour
 
                 dotPositions.Add(mouse_world_position);
                 createLine();
+
+                Debug.Log(mouse_world_position);
             }
             else if(onCanvas && Input.GetMouseButton(0))
             {
@@ -52,14 +54,18 @@ public class DrawLine : MonoBehaviour
                 }
             }
         }
+
+        if(!onCanvas)
+        {
+            if(line != null) Destroy(line); // Line 지움. 데이터는 그대로.
+        }
     }
 
     void createLine()
     {
-        Debug.Log("created");
         line = GameObject.Instantiate(linePrefab);     
         lineRenderer = line.GetComponent<LineRenderer>();
-        lineRenderer.SetWidth(0.02f, 0.02f);
+        lineRenderer.SetWidth(0.005f, 0.005f);
         lineRenderer.SetPosition(0, dotPositions[0]);
         lineRenderer.positionCount = 1;
     }
