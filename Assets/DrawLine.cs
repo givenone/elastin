@@ -5,7 +5,7 @@ using UnityEngine;
 public class DrawLine : MonoBehaviour
 {
     public GameObject linePrefab;
-
+     
     private LineRenderer lineRenderer;
     private GameObject line;
     private List<Vector3> dotPositions;
@@ -73,8 +73,6 @@ public class DrawLine : MonoBehaviour
     void updateLine()
     {
         if(lineRenderer.positionCount < maxcount){
-            Debug.Log(dotPositions.Count);
-            Debug.Log(dotPositions[dotPositions.Count - 1]);
 
             lineRenderer.positionCount++;
             lineRenderer.SetPosition(dotPositions.Count -1,  dotPositions[dotPositions.Count - 1]);

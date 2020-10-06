@@ -18,18 +18,18 @@ public class HairManager : MonoBehaviour
     public Dropdown curl; // Dropdown for curl style.
     public GameObject sCurlOption;
     public GameObject cCurlOption;
+    public GameObject DrawCanvas;
     
     public int n_rendered_strand;
     List<LineRenderer> original_lines = new List<LineRenderer>();
-    float length_scale = 2.0f;
+    public List<Vector3> strandCkpt = new List<Vector3>(); // Grid 선택을 위한 머리카락 별 체크포인트 좌표
+    float length_scale = 50.0f; // 정수화 함. (Slider onValueChange 너무 자주 실행돼서.)
     List<int> visibilities = new List<int>(); // # of vertices in a strand
     Color original_color = Color.white;
     int hair_model_index = 0;
     string[] hair_models = {"curly", "short", "garma", "dandy", "long", "rocker"};
     float max_x=float.NegativeInfinity, max_y=float.NegativeInfinity, max_z=float.NegativeInfinity;
     float min_x=float.PositiveInfinity, min_y=float.PositiveInfinity, min_z=float.PositiveInfinity;
-
-    List<Vector3> scalp = new List<Vector3>(); // 두피 좌표
 
     // Start is called before the first frame update
     public void GenerateModel(string filename)
@@ -55,16 +55,15 @@ public class HairManager : MonoBehaviour
                     n_rendered_vertex = n_vertex-n_exclude_vertex;
                     if (n_rendered_vertex >= 0){
                         Vector3[] vertices = new Vector3[n_rendered_vertex/skip_factor];
-
+                        
+                        strandCkpt.Add(new Vector3(0, 0, 0)); // 두피 좌표 (첫 점)
+                        
                         int vertex_count = 0;
                         for (int j = 0; j < n_rendered_vertex; j++)
                         {
                             x = reader.ReadSingle();
                             y = reader.ReadSingle();
                             z = reader.ReadSingle();
-                            if(j == 0){
-                                scalp.Add(new Vector3(x, y, z)); // 두피 좌표 (첫 점)
-                            }
 
                             if(j % skip_factor == 0 && vertex_count < n_rendered_vertex/skip_factor){
                                 x = x + cx -hx;
@@ -79,6 +78,18 @@ public class HairManager : MonoBehaviour
                                 min_y = Math.Min(max_y, y);
                                 max_z = Math.Max(max_z, z);
                                 min_z = Math.Min(max_z, z);
+
+                                // strand별 ckpt(grid 선택을 위한) 설정 
+                                if(j == 0){
+                                    strandCkpt[strandCkpt.Count-1] = new Vector3(x,y,z);
+                                }
+                                if(j == 20){
+                                    strandCkpt[strandCkpt.Count-1] = new Vector3(x,y,z);
+                                }
+                                if(j == 35){
+                                    strandCkpt[strandCkpt.Count-1] = new Vector3(x,y,z);
+                                }                                
+     
                             }
                         }
                         for (int j = n_rendered_vertex; j < n_vertex; j++)
@@ -87,10 +98,12 @@ public class HairManager : MonoBehaviour
                             y = reader.ReadSingle();
                             z = reader.ReadSingle();
                         }
-                        if (i % 2 == 0) {
-                            DrawAndSaveStrand(vertices, n_rendered_vertex/skip_factor, strand_count);
-                            strand_count ++;
-                        }
+
+                        // 수정함 : 모든 Strand 렌더링.
+
+                        DrawAndSaveStrand(vertices, n_rendered_vertex/skip_factor, strand_count);
+                        strand_count ++;
+                        
                     }
                     else{
                         for (int j = 0; j < n_vertex; j++)
@@ -212,7 +225,7 @@ public class HairManager : MonoBehaviour
 
     }
     public void ChangeLength(){ // from slider 1
-        float granularity = (slider1.value - length_scale)*25;
+        float granularity = (slider1.value - length_scale);
         if(granularity<=-1 || granularity>=1){
 
             if (slider1.value < length_scale){
@@ -413,19 +426,24 @@ public class HairManager : MonoBehaviour
         if (style == 0){ // reset
             sCurlOption.SetActive(false);
             cCurlOption.SetActive(false);
-
+            DrawCanvas.SetActive(false);
         }
-
         else if(style == 1){
             sCurlOption.SetActive(false);
             cCurlOption.SetActive(true);
+            DrawCanvas.SetActive(false);
         }
 
         else if(style == 2){
             sCurlOption.SetActive(true);
             cCurlOption.SetActive(false);
-
-        }   
+            DrawCanvas.SetActive(false);
+        }
+        else if(style == 3){
+            sCurlOption.SetActive(false);
+            cCurlOption.SetActive(false);
+            DrawCanvas.SetActive(true);
+        }        
     }
     // Hair Curliness Control ends
 
