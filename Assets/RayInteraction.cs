@@ -10,6 +10,7 @@ public class RayInteraction : MonoBehaviour
     public GridManager gridManager;
     public HairManager hairManager;
     public GameObject Group;
+    public Slider selectSensitivity;
     public float distance = 10f;
     public bool rayEnable;
     public List<int> _selected_strands = new List<int>();
@@ -18,6 +19,12 @@ public class RayInteraction : MonoBehaviour
 
     private ToggleGroup selectToggle;
     private int mode;
+    private float threshold = 0.05f;
+
+
+    public void changeSensitivity(){
+        threshold = selectSensitivity.value;
+    }
 
     public void ToggleMode()
     {
@@ -70,8 +77,7 @@ public class RayInteraction : MonoBehaviour
                     int first = gridManager.Cell2Strand[_cell_key][0];
                     Debug.Log(hairManager.n_rendered_strand.ToString() + " " + hairManager.strandCkpt.Count.ToString());
                     foreach (int _strand_idx in gridManager.Cell2Strand[_cell_key]){
-                        // 연속성이 없어서 구현해본 부분(가까운 것 선택. 일단 선택만)
-                        float threshold = 0.05f;
+                        // 연속성이 없어서 구현해본 부분(가까운 것 선택. 일단 선택만)                       
                                                 
                         if(mode == 2){
                             // List에서 제거

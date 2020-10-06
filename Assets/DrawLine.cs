@@ -37,7 +37,7 @@ public class DrawLine : MonoBehaviour
 
             if(onCanvas && Input.GetMouseButtonDown(0))
             {// Line 시작
-                if(line != null) Destroy(line);
+                if(line != null) Destroy(line); // 전에 남아있던 데이터 지움.
                 dotPositions.RemoveRange(0, dotPositions.Count);
 
                 dotPositions.Add(mouse_world_position);
@@ -45,17 +45,11 @@ public class DrawLine : MonoBehaviour
             }
             else if(onCanvas && Input.GetMouseButton(0))
             {
-                if(Vector3.Distance(mouse_world_position, dotPositions[dotPositions.Count - 1]) > 0.01f){
+                if(Vector3.Distance(mouse_world_position, dotPositions[dotPositions.Count - 1]) > 0.01f){ // 너무 라인 많이 생기지 않도록.
                     // Line 이어주기.
                     dotPositions.Add(mouse_world_position);
-
                     updateLine();
                 }
-            }
-            else
-            {// Line 끝
-                dotPositions.RemoveRange(0, dotPositions.Count);
-                Destroy(line);
             }
         }
     }
